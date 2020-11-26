@@ -129,6 +129,24 @@ describe('Client', () => {
     });
   });
 
+  describe('#mediaPlayer()', () => {
+    it('should return info for the media player', () => {
+      fetch.mockResponse(loadResponse('media-player'));
+      return client.mediaPlayer().then((info) => {
+        expect(info).toBeInstanceOf(Object);
+        expect(info['state']).toEqual('play');
+        expect(info['position']).toEqual('6916 ms');
+        expect(info.app['id']).toEqual('dev');
+        expect(info.app['name']).toEqual('MultiLive');
+        expect(info.format['audio']).toEqual('aac');
+        expect(info.format['captions']).toEqual('none');
+        expect(info.format['video']).toEqual('mpeg4_15');
+        expect(info.format['drm']).toEqual('none');
+        expect(info['isLive']).toEqual('false');
+      });
+    });
+  });
+
   describe('#keypress()', () => {
     it('should press the home button', () =>
       client.keypress('Home').then(() => {

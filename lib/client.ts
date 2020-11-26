@@ -14,6 +14,10 @@ const debug = _debug('roku-client:client');
 /** The keys that can exist in a roku device info object. */
 export type RokuDeviceInfo = Record<string, string>;
 
+// TODO: make this an interface with the possible values
+/** The keys that can exist in a roku media player info object. */
+export type RokuMediaPlayerInfo = any;
+
 /** The ids used by roku to identify an app. */
 export type RokuAppId = number | string;
 
@@ -70,6 +74,40 @@ function appXMLToJS(app: any): RokuApp {
     type,
     version,
   };
+}
+/**
+ * Convert the xml version of a roku player info
+ * to a cleaned up js version.
+ */
+function mediaPlayerXMLToJS(player: any): RokuMediaPlayerInfo {
+  const appData = player['plugin'] ? player['plugin'][0].$ : {};
+  const formatData = player['format'] ? player['format'][0].$ : {};
+  const bufferingData = player['buffering'] ? player['buffering'][0].$ : {};
+  const newStreamData = player['new_stream'] ? player['new_stream'][0].$ : {};
+  const streamSegmentData = player['stream_segment']
+    ? player['stream_segment'][0].$
+    : {};
+
+  const position = player['position'] ? player['position'][0] : null;
+  const duration = player['duration'] ? player['duration'][0] : null;
+  const runtime = player['runtime'] ? player['runtime'][0] : null;
+  const isLive = player['is_live'] ? player['is_live'][0] : null;
+
+  const mediaPlayerInfo = {
+    state: player.$['state'],
+    error: player.$['error'],
+    app: appData,
+    format: formatData,
+    position,
+    runtime,
+    duration,
+    isLive,
+    buffering: bufferingData,
+    newStream: newStreamData,
+    streamSegment: streamSegmentData,
+  };
+
+  return mediaPlayerInfo;
 }
 
 /**
@@ -175,6 +213,24 @@ export class RokuClient {
           {} as RokuDeviceInfo,
         ),
       );
+  }
+
+  /**
+   * Get the active app, or null if the home screen is displayed.
+   * @see {@link https://developer.roku.com/docs/developer-program/debugging/external-control-api.md#queryactive-app-examples}
+   */
+  mediaPlayer(): Promise<RokuMediaPlayerInfo | null> {
+    const endpoint = `${this.ip}/query/media-player`;
+    debug(`GET ${endpoint}`);
+    return fetch(endpoint)
+      .then(parseXML)
+      .then((data) => {
+        const player = data['player'];
+        if (!player) {
+          return null;
+        }
+        return mediaPlayerXMLToJS(player);
+      });
   }
 
   /**
