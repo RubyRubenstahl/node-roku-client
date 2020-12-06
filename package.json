@@ -1,5 +1,5 @@
 {
-  "name": "roku-client",
+  "name": "@rubyrubenstahl/roku-client",
   "version": "4.2.0",
   "description": "Send commands to your Roku devices",
   "engines": {
@@ -18,11 +18,6 @@
     "build": "tsc",
     "release": "standard-version",
     "prepublishOnly": "npm run test && npm run build"
-  },
-  "husky": {
-    "hooks": {
-      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
-    }
   },
   "keywords": [
     "roku",
@@ -67,3 +62,4 @@
     "typescript": "^3.9.7"
   }
 }
+
